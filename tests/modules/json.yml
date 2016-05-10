@@ -1,0 +1,47 @@
+---
+- hosts: all
+  gather_facts: no
+  become: no
+
+  tasks:
+    - name: "TODO: Should Error, due to required_together"
+      local_action: json path="kibana_config.json"
+
+    - name: Update json values
+      json:
+        path: kibana_config.json
+        target: tmp/kibana_config_update.json
+        replace:
+          json_path: '/_source/defaultIndex'
+          with_value: 'artifactory-*'
+        delete:
+          json_path: '/found'
+        insert:
+          json_path: '/_source/__NEW__'
+          value: '__TEXT__'
+
+    - name: Update json no change
+      json:
+        path: kibana_config.json
+        target: tmp/kibana_config_nochange.json
+        replace:
+          json_path: '/_source/defaultIndex'
+          with_value: 'filebeat-*'
+
+    - name: Update json no change, force
+      json:
+        path: kibana_config.json
+        target: tmp/kibana_config_nochange_forced.json
+        replace:
+          json_path: '/_source/defaultIndex'
+          with_value: 'filebeat-*'
+        force: True
+
+    - name: Update json indent, only if changed
+      json:
+        path: kibana_config.json
+        target: tmp/kibana_config_indent.json
+        replace:
+          json_path: '/_source/defaultIndex'
+          with_value: 'artifactory-*'
+        indent: 4

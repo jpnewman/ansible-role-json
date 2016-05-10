@@ -1,0 +1,112 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# import module snippets
+from ansible.module_utils.basic import *
+
+import os
+import sys
+import json
+import codecs
+import dpath.util
+
+from collections import OrderedDict
+
+DOCUMENTATION = '''
+---
+module: json
+author: "John Paul Newman"
+version_added: "0.1"
+short_description: Edits JSON files
+requirements: [dpath]
+description:
+This Ansible module can be used to add, delete, and update elements
+within a JSON file.
+options:
+    name: path
+        required: true
+'''
+
+EXAMPLES = '''
+'''
+
+
+def xpath_set(mydict, path, value):
+    elem = mydict
+    try:
+        for x in path.strip("/").split("/"):
+            str = ""
+    except:
+        pass
+
+    return elem.__class__.__name__
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec=dict(
+            path=dict(required=True, default=None, type='str'),
+            target=dict(required=False, default=None, type='str'),
+            replace=dict(required=False, default={}, type='dict'),
+            delete=dict(required=False, default={}, type='dict'),
+            insert=dict(required=False, default={}, type='dict'),
+
+            indent=dict(required=False, default=2, type='int'),
+            force=dict(required=False, default=False, type='bool')
+        ),
+        required_one_of=[['replace', 'delete', 'insert']],
+        required_together=[
+            ['path', 'replace'],
+            ['path', 'delete'],
+            ['path', 'insert'],
+        ],
+        supports_check_mode=True
+    )
+
+    p = module.params
+    changed = False
+
+    json_obj = json.load(codecs.open(p['path'], 'r', 'utf-8-sig'),
+                         object_pairs_hook=OrderedDict)
+
+    if p['replace']:
+        old_val = dpath.util.get(json_obj,
+                                 p['replace'].get('json_path'))
+
+        if old_val != p['replace'].get('with_value'):
+            dpath.util.set(json_obj,
+                           p['replace'].get('json_path'),
+                           p['replace'].get('with_value'))
+            changed = True
+
+    if p['delete']:
+        dpath.util.delete(json_obj,
+                          p['delete'].get('json_path'))
+        changed = True
+
+    if p['insert']:
+        dpath.util.new(json_obj,
+                       p['insert'].get('json_path'),
+                       p['insert'].get('value'))
+        changed = True
+
+    output_file = p['path']
+    if p['target']:
+        output_file = p['target']
+
+        if not os.path.isfile(output_file):
+            changed = True
+
+    if p['force']:
+        changed = True
+
+    if changed and not module.check_mode:
+        with open(output_file, 'w') as outfile:
+            json.dump(json_obj, outfile, indent=p['indent'], sort_keys=False)
+
+    result = {'changed': changed}
+    module.exit_json(**result)
+
+
+if __name__ == '__main__':
+    main()

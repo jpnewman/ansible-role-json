@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: no
+  become: no
+
+  vars_files:
+    - ../../defaults/main.yml
+
+  tasks:
+    - name: Update kibana config values
+      local_action: json_mod path="kibana_config.json" defaultIndex="artifactory-*"

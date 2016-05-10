@@ -1,0 +1,11 @@
+{
+  "_index": ".kibana", 
+  "_type": "config", 
+  "_id": "4.5.0", 
+  "_version": 2, 
+  "_source": {
+    "buildNum": 9889, 
+    "defaultIndex": "artifactory-*", 
+    "__NEW__": "__TEXT__"
+  }
+}
