@@ -1,5 +1,7 @@
 # jpnewman.json
 
+[![Build Status](https://travis-ci.org/jpnewman/ansible-role-json.svg?branch=master)](https://travis-ci.org/jpnewman/ansible-role-json)
+
 This is a Ansible role that includes a library for json
 
 ## Requirements
